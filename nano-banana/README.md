@@ -24,8 +24,8 @@ Image returned as binary file for easy download or further use in workflows
 Node: Basic LLM Chain
 Purpose: Expands the short user input into a detailed, cinematic description.
 Connected to:
-   Google Gemini Chat Model (as the LLM)
-   Structured Output Parser (for clean JSON response).
+   - Google Gemini Chat Model (as the LLM)
+   - Structured Output Parser (for clean JSON response).
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 3. Google Gemini Chat Model (as the LLM)
