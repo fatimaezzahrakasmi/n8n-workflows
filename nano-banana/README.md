@@ -46,10 +46,9 @@ User Input: {{ $json.Input }}
 
 FINAL INSTRUCTIONS:
 
-The result must be fewer than 500 characters.
-
-Return only one JSON object in the format:
-{ "prompt": "Generated text output here..." }
+- The result must be fewer than 500 characters.
+- Return only one JSON object in the format:
+- { "prompt": "Generated text output here..." }
 
 ---
 
@@ -89,18 +88,18 @@ Copy code
   ]
 }
 
+<img width="682" height="535" alt="image" src="https://github.com/user-attachments/assets/082179b9-9fde-420b-9136-fd44b9fb684a" />
+
+
 ---
 
 ### Edit Fields
 Node: Set
 
 Purpose: Extracts and processes output fields:
-
-image_full → full image URL
-
-image_raw → base64-encoded image
-
-image_type → file type (e.g., png, jpeg)
+- image_full → full image URL
+- image_raw → base64-encoded image
+- image_type → file type (e.g., png, jpeg)
 
 ---
 
@@ -112,27 +111,23 @@ Purpose: Converts base64-encoded image into a downloadable binary file.
 ---
 
 ## ⚡ Setup Instructions
-Import this workflow JSON into your n8n instance.
+- Import this workflow JSON into your n8n instance.
+- Configure credentials:
+    - Google Gemini (API)
+    - OpenRouter API
+- Activate the workflow.
+- Submit text descriptions via the form.
+- Receive AI-generated cinematic images automatically.
 
-Configure credentials:
-
-Google Gemini (API)
-
-OpenRouter API
-
-Activate the workflow.
-
-Submit text descriptions via the form.
-
-Receive AI-generated cinematic images automatically.
-
-Example Input → Output
+# Example Input → Output
 Input:
 
 A baby eats a banana
+
 Expanded Prompt (LLM):
 
 A cinematic close-up of a baby with soft golden lighting, sitting in a high chair, joyfully eating a ripe banana. Ultra-realistic textures, detailed facial expressions, professional studio photography style.
+
 Output:
 
 🎨 Hyper-realistic AI image returned as both URL + downloadable file
