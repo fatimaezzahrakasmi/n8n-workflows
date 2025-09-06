@@ -1,0 +1,138 @@
+{
+  "name": "weather automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        -64
+      ],
+      "id": "f764db57-c18f-4af3-bb3f-ce8660471ff3",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "cityName": "Tangier",
+        "language": "en"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -64
+      ],
+      "id": "307bf617-fc3e-4d6c-9816-a19e1b9ebec5",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "ypGfSgKwVxPX4kC9",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "72708e7b-7215-4d1b-8e86-55fc0ca95510",
+              "name": "message",
+              "value": "=`🌤️ Good morning! Here's the weather for today:\n🌡️ Temp: {{ $json.main.temp }}°C\n💨 Wind: {{ $json.wind.speed }} m/s\n☁️ Condition: {{ $json.weather[0].description }}`\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        -64
+      ],
+      "id": "41e94d99-2542-4262-863f-26608d2ca3ff",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "chatId": "6745000283",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "63d99f9b-ca70-4a6d-8c06-af6546e3cba3",
+      "name": "Send a text message",
+      "webhookId": "f92665fe-894b-410e-b2f1-c0d3dbc676f3",
+      "credentials": {
+        "telegramApi": {
+          "id": "MgE1fift5mNfIAXp",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "943ffeeb-c28a-4063-96ac-f87940fec4e6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "05b43d970e90b8dc484d32bee9c746d8da6ba85c01b1340d226d17d797ca7ef3"
+  },
+  "id": "c4VlzNVat3Vn46Kc",
+  "tags": []
+}
