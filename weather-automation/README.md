@@ -1,6 +1,7 @@
-<img width="1048" height="354" alt="image" src="https://github.com/user-attachments/assets/94cb9257-a499-4086-a554-a6741c18d235" />
-
 # Weather Automation Workflow
+
+
+<img width="1048" height="354" alt="image" src="https://github.com/user-attachments/assets/94cb9257-a499-4086-a554-a6741c18d235" />
 
 This n8n workflow automatically fetches the daily weather for Tangier and sends it as a Telegram message every day at 7:00 AM.
 
@@ -81,5 +82,6 @@ The workflow consists of the following steps:
 ## License
 
 This workflow is open-source and free to use. Modify it as needed for your personal or professional projects.
+
 
 
