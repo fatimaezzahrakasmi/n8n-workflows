@@ -69,3 +69,17 @@ The workflow consists of the following steps:
 
 ## Example Output
 
+🌤️ Good morning! Here's the weather for today:
+
+ 🌡️ Temp: 25°C
+ 💨 Wind: 3.5 m/s
+ ☁️ Condition: scattered clouds
+
+ 
+---
+
+## License
+
+This workflow is open-source and free to use. Modify it as needed for your personal or professional projects.
+
+
