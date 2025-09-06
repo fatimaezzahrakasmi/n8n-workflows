@@ -1,0 +1,835 @@
+{
+  "name": "Baby Podcast",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Baby Podcast",
+        "formDescription": "Fill the Baby Ethnicity, Baby hairstyle, Topic of discussion and any extras",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Baby Ethnicity",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Middle Eastern"
+                  },
+                  {
+                    "option": "Asian"
+                  },
+                  {
+                    "option": "African American"
+                  },
+                  {
+                    "option": "European"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Baby Hairstyle",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Blad"
+                  },
+                  {
+                    "option": "Curly"
+                  },
+                  {
+                    "option": "Straight"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Topic of discussion",
+              "placeholder": "Artificial Intelligence, n8n, AI automation...",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Any Extras to Add",
+              "placeholder": "Wearing a hat."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -752,
+        -192
+      ],
+      "id": "ed66c440-445e-4ebb-a114-186902620f49",
+      "name": "On form submission",
+      "webhookId": "c950a46a-3131-4222-bed7-38c33de66d37"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a podcast-style monologue in the style of Joe Rogan, discussing the topic of {{ $json['Topic of discussion'] }}. Ensure the tone is casual, intense, and slightly conspiratorial, with tangents, unexpected analogies, and the characteristic Joe Rogan style of pondering deep existential questions. Avoid line breaks, special characters, or formatting that would invlidate the JSON structure. Keep it flowing naturally as if it's a segment from a podcast episode. Most importantly make it in american style.\n\nEnsure the entire monolgue is ouptut as a single JSON object called Podcast and is ONLY 500 characters long.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -400,
+        -192
+      ],
+      "id": "875dd3ff-f2a3-4352-a8ef-7d98e7d4d8af",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4.1",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        16
+      ],
+      "id": "804b16d8-fb18-4637-ac3c-57bdd6364e10",
+      "name": "OpenRouter Chat Model"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hedra.com/web-app/public/assets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"name\": \"baby-podcaster-audio\",\n  \"type\": \"audio\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        -176
+      ],
+      "id": "d6a58808-9b45-4b64-bd7b-c63d7f234a8d",
+      "name": "Create Speech Asset"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        224,
+        -48
+      ],
+      "id": "83b4611c-c5e7-4657-8398-cfe0fba680d0",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const binaryItem = items.find(i => i.binary && Object.keys(i.binary).length > 0);\nconst metadataItem = items.find(i => i.json && i.json.id && i.json.type);\n\nreturn [\n  {\n    json: {\n      id: metadataItem.json.id,\n      type: metadataItem.json.type,\n      name: metadataItem.json.name || 'uploaded-asset'\n    },\n    binary: {\n      data: binaryItem.binary.data\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -160
+      ],
+      "id": "eb1f694a-4faf-4866-85d6-94aff02eb49a",
+      "name": "Repacker"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.hedra.com/web-app/public/assets/{{ $json.id }}/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        592,
+        -160
+      ],
+      "id": "ed4f6220-3dcc-44b1-8338-95fe6cd745bd",
+      "name": "Upload Audio"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        112
+      ],
+      "id": "45418189-2299-4d90-a4ca-be93dfad2ade",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4.1",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        624
+      ],
+      "id": "951bc344-9248-44ae-9be5-780a6c549f6e",
+      "name": "OpenRouter Chat Model1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a high-resolution prompt of a very cute, chubby,{{ $json['Baby Hairstyle'] }} hair, {{ $json['Baby Ethnicity'] }} baby wearing large over-ear headphones and speaking into a professional podcast microphone. The baby has a focused yet adorable expression. \nThe background should resemble a podcast studio setting with a dark, rich curtain and warm, soft lighting that heghlights the baby's chubby cheeks and innocent face. {{ $json['Any Extras to Add'] }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -480,
+        416
+      ],
+      "id": "36033cce-94ca-43d5-8ea6-d4a43c387e58",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.runware.ai/v1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ [\n{\n\"taskType\": \"imageInference\",\n\"taskUUID\": \"70c765bb-299d-4f2f-a16a-d839c4b0d234\",\n\"model\": \"rundiffusion:133005@357609\",\n\"positivePrompt\": $json.text,\n\"width\": 1152,\n\"height\": 1152,\n\"steps\": 30\n}\n] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        672
+      ],
+      "id": "db27289e-f760-4e0d-ae2f-dbc08b5ad2b6",
+      "name": "Generate Image"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hedra.com/web-app/public/assets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"name\": \"baby-podcaster-image\",\n  \"type\": \"image\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -160,
+        400
+      ],
+      "id": "e159a944-2613-4576-8f95-2fe37b96f02d",
+      "name": "Create ImageAsset"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Generate Image').item.json.data[0].imageURL }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        64,
+        400
+      ],
+      "id": "7ad8bbc1-f450-4201-86fd-16ef7febd1e7",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        16,
+        656
+      ],
+      "id": "ab9e5a6b-f074-430c-91f6-d5b27701d961",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const binaryItem = items.find(i => i.binary && Object.keys(i.binary).length > 0);\nconst metadataItem = items.find(i => i.json && i.json.id && i.json.type);\n\nreturn [\n  {\n    json: {\n      id: metadataItem.json.id,\n      type: metadataItem.json.type,\n      name: metadataItem.json.name || 'uploaded-asset'\n    },\n    binary: {\n      data: binaryItem.binary.data\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        656
+      ],
+      "id": "f0f871d2-4ec5-49df-939a-9961990a60db",
+      "name": "Repacker1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.hedra.com/web-app/public/assets/{{ $json.id }}/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        592,
+        400
+      ],
+      "id": "c5d711be-da35-4442-b109-397a038ce67a",
+      "name": "Upload Image"
+    },
+    {
+      "parameters": {
+        "jsCode": "let image_asset_id = null;\nlet audio_asset_id = null;\nlet image_url = null;\nlet audio_url = null;\n\nfor (const item of items) {\n  const { type, id, asset } = item.json;\n\n  if (type === 'image') {\n    image_asset_id = id;\n    image_url = asset?.url || null;\n  } else if (type === 'audio') {\n    audio_asset_id = id;\n    audio_url = asset?.url || null;\n  }\n}\n\nreturn [\n  {\n    json: {\n      image_asset_id,\n      audio_asset_id,\n      image_url,\n      audio_url\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        112
+      ],
+      "id": "e7631a91-6a00-4454-8a92-8b84393c96ca",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hedra.com/web-app/public/generations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"type\": \"video\",\n\n  \"ai_model_id\": \"d1dd37a3-e39a-4854-a298-6510289f9cf2\",\n\n  \"start_keyframe_id\": \"{{ $json.image_asset_id }}\",\n\n  \"audio_id\": \"{{ $json.audio_asset_id }}\",\n\n  \"generated_video_inputs\": {\n\n    \"text_prompt\": \"A baby podcast host seated in front of a microphone, speaking with calm intensity and natural focus. Subtle facial expressions, minimal head movement, steady eye contact with the camera. Studio lighting with a professional podcast setup in the backgroud. \",\n    \"resolution\": \"720p\",\n\n    \"aspect_ratio\": \"9:16\",\n\n    \"duration_ms\": 5000,\n\n    \"bounding_box_target\": [\n      1,\n      1\n    ]\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1312,
+        112
+      ],
+      "id": "772f7abf-28ec-43c9-a17b-4865ce826d93",
+      "name": "Generate Video"
+    },
+    {
+      "parameters": {
+        "amount": 300
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        400
+      ],
+      "id": "7ef111bd-ea17-42ba-a22e-84371f918aa3",
+      "name": "Wait",
+      "webhookId": "54beca35-f8fe-43c1-8a50-940be8bfa384"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1552,
+        112
+      ],
+      "id": "5d0d1c17-2ed4-4b93-80a2-a7343fec6118",
+      "name": "5 Seconds",
+      "webhookId": "564ef948-87df-42e9-89c1-0e64353739bb"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hedra.com/web-app/public/assets?type=video&ids={{ $json.asset_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1392,
+        400
+      ],
+      "id": "6f13c20f-c517-47fd-8dde-7ecfeeef5c57",
+      "name": "Get Video Url"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.asset.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        112
+      ],
+      "id": "272dc63b-7490-45f5-8ad1-8817f8b8e624",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "6745000283",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2096,
+        128
+      ],
+      "id": "3a2bfaa2-a6be-4b46-b5d0-b07a7e677a63",
+      "name": "Telegram",
+      "webhookId": "dbdb1286-d1ad-44af-9241-2fb798d49423"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/JBFqnCBsd6RMkjVDRZzb?output_format=mp3_44100_128",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\"text\": $json.text} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -192,
+        48
+      ],
+      "id": "edb68fdd-9d88-4512-bed9-0f38d70e5c74",
+      "name": "Elevanlabs Test"
+    },
+    {
+      "parameters": {
+        "content": "User Form Trigger",
+        "height": 224,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -816,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "4fb2b40e-0304-467e-869f-2d8bac6b653a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Generate Podcast Script & Convert to Audio",
+        "height": 544,
+        "width": 1168,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -448,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "b4189cc7-d501-4670-985e-093a1c50e3c7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Generate Baby Podcaster Image",
+        "height": 560,
+        "width": 1296,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -528,
+        304
+      ],
+      "typeVersion": 1,
+      "id": "d83627c9-e356-41cb-b397-4934890f68df",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Combine Audio + Image → Generate Video",
+        "height": 544,
+        "width": 1136,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        832,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "66bb328c-ec15-4cc2-b43d-c5b309f52bc6",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Send Final Video to Telegram",
+        "height": 304,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2000,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "2528497c-2486-43d9-9bb1-35ae85e04c56",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Elevanlabs Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Speech Asset": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Repacker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Repacker": {
+      "main": [
+        [
+          {
+            "node": "Upload Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Audio": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image": {
+      "main": [
+        [
+          {
+            "node": "Create ImageAsset",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create ImageAsset": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Repacker1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Repacker1": {
+      "main": [
+        [
+          {
+            "node": "Upload Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Video Url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Url": {
+      "main": [
+        [
+          {
+            "node": "5 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5 Seconds": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Elevanlabs Test": {
+      "main": [
+        [
+          {
+            "node": "Create Speech Asset",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "94baea2a-c96d-4d85-88e6-be33c564e3d4",
+  "meta": {
+    "instanceId": "05b43d970e90b8dc484d32bee9c746d8da6ba85c01b1340d226d17d797ca7ef3"
+  },
+  "id": "8BXoljT4vVzq9LFl",
+  "tags": []
+}
