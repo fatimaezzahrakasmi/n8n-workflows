@@ -2,6 +2,9 @@
 
 <img width="1252" height="536" alt="image" src="https://github.com/user-attachments/assets/ef46e71e-39e0-4bb8-a36e-8a2621facda5" />
 
+🎥 Watch the full tutorial on YouTube:  
+https://youtu.be/b4Kd7EvlnL4
+
 This n8n workflow allows users to input a **simple scene description**, which is then automatically expanded into a **cinematic, hyper-realistic prompt**.  
 The optimized prompt is suitable for **text-to-image and text-to-video models** (Flux, MidJourney, Stable Diffusion, Runway Gen-3 Alpha, Pika Labs).  
 Finally, the expanded prompt is sent to **OpenRouter’s API** (Google Gemini 2.5 Flash image preview), which generates an **AI image**.
@@ -131,10 +134,6 @@ A cinematic close-up of a baby with soft golden lighting, sitting in a high chai
 Output:
 
 🎨 Hyper-realistic AI image returned as both URL + downloadable file
-
----
-Youtup Video:
-https://youtu.be/b4Kd7EvlnL4
 
 ### 📜 License
 This workflow is open-source and free to use.
