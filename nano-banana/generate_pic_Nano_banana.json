@@ -92,7 +92,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash-image-preview:free\",\n\"modalities\": [\"image\", \"text\"],\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.output.prompt }}\"\n    }\n  ]\n}\n ",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash-image-preview\",\n\"modalities\": [\"image\", \"text\"],\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.output.prompt }}\"\n    }\n  ]\n}\n ",
         "options": {
           "response": {
             "response": {
