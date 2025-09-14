@@ -78,7 +78,7 @@ Request Body:
 json
 Copy code
 {
-  "model": "google/gemini-2.5-flash-image-preview:free",
+  "model": "google/gemini-2.5-flash-image-preview",
   "modalities": ["image", "text"],
   "messages": [
     {
@@ -88,7 +88,7 @@ Copy code
   ]
 }
 
-<img width="682" height="535" alt="image" src="https://github.com/user-attachments/assets/082179b9-9fde-420b-9136-fd44b9fb684a" />
+<img width="680" height="677" alt="image" src="https://github.com/user-attachments/assets/2ef45a52-5e1e-43c1-a33b-d1a2995fb60d" />
 
 
 ---
