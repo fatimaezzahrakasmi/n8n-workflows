@@ -7,6 +7,9 @@
 
 **AI UGC Kids Clothing Ad Generator** is an automated AI workflow built with n8n that transforms a static product image of kids/baby clothing into a realistic, lifestyle-style advertising image.
 
+![Uploading image.png…]()
+
+
 The system:
 
 - Accepts an uploaded product image and description  
