@@ -1,0 +1,401 @@
+{
+  "name": "generate_pictures(last version)",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -112,
+        640
+      ],
+      "id": "09013592-1edd-4ff8-8a98-5c4e95dd8dfc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q0h6Ng7xCGL3V4F0",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Your task: Create an image prompt as guided by your system guidelines.\n\nMake sure that the reference image is depicted as ACCURATELY as possible in the resulting images, especially all text, details, jewelry or any stuff.\n\n\nThese are the user's description:\n{{ $('On form submission1').item.json['Image description'] }}\n\n\nDescription of the reference image:\n{{ $json.content }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=ROLE: Kids Clothing Image Edit Prompt Builder\n\nPurpose: Given an image of baby/kid clothes, generate an image of a child wearing the same outfit, keeping the clothes exactly as shown, while possibly changing the background, pose, or setting.\n\nDefaults:\n\nUse the uploaded image as the source of the clothes.\n\nPlace the child in a fitting everyday or playful setting (playground, beach, store, home, etc.).\n\nIf style not given, use casual realism suitable for kids’ clothing ads.\n\nRealism:\n\nLook authentic, cute, and relatable.\n\nSlight imperfections: off-center framing, natural light, light motion blur, mild grain.\n\nDo not alter the clothes; keep color, pattern, and details exactly as in the source image.\n\nCamera Cues (use ≥2):\nphone snapshot, handheld framing, off-center composition, natural indoor/outdoor light, soft shadows, slight motion blur, auto exposure, unpolished look, mild grain.\n\nDiversity:\n\nChild can be a boy or girl depending on the clothes in the uploaded image.\n\nAge depends on the outfit (newborn to 13 years).\n\nVary ethnicity naturally.\n\nOutput:\nReturn only one JSON object:\n\n{ \n  \"image_prompt\": \"one string (≤120 words) covering child, clothes (exactly as in uploaded image), action/pose, mood, setting, style/camera, colors, brand/label accuracy\" \n}\n\n\nGood Example:\n\n{ \n  \"image_prompt\": \"adorable 5-year-old girl wearing the exact pink ruffled dress from uploaded image, skipping joyfully in a sunny playground; action: holding a small toy bucket; mood: cheerful and playful; setting: playground with swings and slides; style/camera: phone snapshot, handheld framing, natural light, slight motion blur, soft shadows; colors: pink dress stands out against green grass; text accuracy: keep clothing details exactly as in uploaded image\" \n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        416
+      ],
+      "id": "ccd1a428-460a-43c5-b03d-70bcd3e95efa",
+      "name": "Image Prompt Generator"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"image_prompt\": \"string\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        608
+      ],
+      "id": "834797a7-e18d-4f62-ad00-d69bd32bdae7",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "base",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        416
+      ],
+      "id": "f0c29239-9b23-4e5f-ae3e-85606bf1e63f",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash-image\",\n  \"modalities\": [\"image\", \"text\"],\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": [\n        {\n          \"type\": \"text\",\n          \"text\": \"{{ $json.output.image_prompt.replace(/\\\"/g, '\\\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n        },\n        {\n          \"type\": \"image_url\",\n          \"image_url\": \"{{ $('Upload file1').item.json.webContentLink }}\"\n}\n\n      ]\n    }\n  ]\n}\n\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        288,
+        416
+      ],
+      "id": "5c166b85-fa2d-4cb4-abeb-a74aeea4e6ca",
+      "name": "HTTP Request",
+      "credentials": {
+        "openRouterApi": {
+          "id": "WWVJls6Mrfsw6hOD",
+          "name": "OpenRouter account"
+        },
+        "httpBearerAuth": {
+          "id": "aBW1tZAdnBsiKGo8",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0d3e1ea2-9386-47bf-8f8a-cce7f349dbe5",
+              "name": "=data",
+              "value": "={{$json[\"choices\"][0][\"message\"][\"images\"][0][\"image_url\"][\"url\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "393caf3e-e367-4490-8ee3-28bfc83318b1",
+              "name": "=base",
+              "value": "={{$json[\"choices\"][0][\"message\"][\"images\"][0][\"image_url\"][\"url\"].split(\",\")[1]}}",
+              "type": "string"
+            },
+            {
+              "id": "f827ebfd-c7d3-48f1-8589-74965070f910",
+              "name": "mime",
+              "value": "={{$json[\"choices\"][0][\"message\"][\"images\"][0][\"image_url\"][\"url\"].match(/^data:([^;]+)/)[1]}}",
+              "type": "string"
+            },
+            {
+              "id": "7de58815-fa11-46ba-acb4-eb4563120218",
+              "name": "fileName",
+              "value": ".png",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        416
+      ],
+      "id": "267381a5-ddff-407e-b60a-c77c527f8743",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "content": "# Upload Image & Description",
+        "height": 288,
+        "width": 656,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -32
+      ],
+      "id": "fb10fd13-eaa6-4cf8-9c6b-480f5be2eb53",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Get New/Edited Image from NanoBanana via OpenRouter",
+        "height": 448,
+        "width": 1008,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        320
+      ],
+      "id": "5837f36c-268d-4c10-98fd-aa14861a0583",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "Image",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "19eYPbCZvWMctxQetcFQCwrt31LItDF9E",
+          "mode": "list",
+          "cachedResultName": "Product Pic",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/19eYPbCZvWMctxQetcFQCwrt31LItDF9E"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        16,
+        64
+      ],
+      "id": "1c6ea1b7-2dcc-4a40-9829-4627a38b712d",
+      "name": "Upload file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "PpLXFteJwsWUlEXx",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "UGC Add Generator",
+        "formDescription": "Generate UGC Adds",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Image description",
+              "placeholder": "Descripte the image",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Image",
+              "fieldType": "file",
+              "acceptFileTypes": ".jpg",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        80
+      ],
+      "id": "462a051d-e0b7-4809-a726-0d5d99fcedf1",
+      "name": "On form submission1",
+      "webhookId": "c7b52200-17f7-4c47-9062-a1b4b7aac270"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "text": "=Analyze the given image and determine if it primarily depicts a product or a character, or BOTH.\n\n- If the image is of a product, return the analysis in YAML format with the following fields:\n\nbrand_name: (Name of the brand shown in the image, if visible or inferable)\ncolor_scheme:\n  - hex: (Hex code of each prominent color used)\n    name: (Descriptive name of the color)\nfont_style: (Describe the font family or style used: serif/sans-serif, bold/thin, etc.)\nvisual_description: (A full sentence or two summarizing what is seen in the image, ignoring the background)\n\n- If the image is of a character, return the analysis in YAML format with the following fields:\n\ncharacter_name: (Name of the character if visible or inferable)\ncolor_scheme:\n  - hex: (Hex code of each prominent color used on the character)\n    name: (Descriptive name of the color)\noutfit_style: (Description of clothing style, accessories, or notable features)\nvisual_description: (A full sentence or two summarizing what the character looks like, ignoring the background)\n\nOnly return the YAML. Do not explain or add any other comments.\n\n\n- if it is BOTH, return both descriptions as guided above in YAML format\n",
+        "imageUrls": "={{ $json.webContentLink }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        240,
+        64
+      ],
+      "id": "04ed7fac-ddd6-43f6-8e81-00617761f2a4",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q0h6Ng7xCGL3V4F0",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Image Prompt Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Prompt Generator": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Image Prompt Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file1": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission1": {
+      "main": [
+        [
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Image Prompt Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "44d2c2df-e3d8-4570-9631-91ec659dd651",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "05b43d970e90b8dc484d32bee9c746d8da6ba85c01b1340d226d17d797ca7ef3"
+  },
+  "id": "MaaZawuV5b0vOuF7",
+  "tags": []
+}
