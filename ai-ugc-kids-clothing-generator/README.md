@@ -1,216 +1,197 @@
-🧸 AI UGC Kids Clothing Ad Generator (n8n + OpenRouter + Gemini Image)
-📌 Overview
+# 🧸 AI UGC Kids Clothing Ad Generator
+### n8n + OpenAI Vision + Gemini Image (via OpenRouter)
 
-### This workflow automatically generates realistic UGC-style advertising images for kids' clothing.
+---
 
-## A user uploads:
+## 🚀 Overview
 
-A product image (kids/baby clothes)
-
-A short description
+**AI UGC Kids Clothing Ad Generator** is an automated AI workflow built with n8n that transforms a static product image of kids/baby clothing into a realistic, lifestyle-style advertising image.
 
 The system:
 
-Uploads the image to Google Drive
+- Accepts an uploaded product image and description  
+- Analyzes the clothing details (brand, colors, style)  
+- Generates a structured and optimized AI image prompt  
+- Sends the prompt + reference image to Gemini Image model  
+- Returns a newly generated UGC-style image of a child wearing the exact same outfit  
 
-Analyzes the product visually (brand, colors, style, etc.)
+The workflow ensures that clothing details remain 100% accurate while placing the child in a natural, relatable environment suitable for modern e-commerce and social media marketing.
 
-Generates a precise image prompt that preserves the exact clothing details
+---
 
-Sends the prompt + reference image to Gemini Image (via OpenRouter)
+## 🎯 Problem It Solves
 
-Returns a newly generated image of a child wearing the exact same outfit in a natural lifestyle setting
+E-commerce brands often only have product-only images (flat lay or mannequin shots) but need:
 
-The result: authentic, ad-ready lifestyle visuals while preserving product accuracy.
+- Lifestyle marketing visuals  
+- UGC-style creatives  
+- Social media ad images  
+- Realistic product presentation  
 
-🚀 Features
+This workflow automates that entire transformation process using AI.
 
-📤 Form-based image upload
+---
 
-☁️ Google Drive integration
+## 🏗️ Workflow Architecture
 
-🧠 AI image analysis (product or character detection)
+### 1️⃣ Form Submission (n8n Trigger)
 
-🎯 Structured prompt generation (JSON enforced)
+- Upload clothing image (.jpg)  
+- Provide short product description  
 
-🖼️ Image generation using google/gemini-2.5-flash-image
+---
 
-🔄 Automatic base64 extraction and file conversion
+### 2️⃣ Google Drive Upload
 
-📦 Ready for UGC-style marketing use
+- Stores uploaded image  
+- Generates public `webContentLink` for AI processing  
 
-🏗️ Workflow Architecture
-1️⃣ Form Trigger
+---
 
-Collects:
+### 3️⃣ Image Analysis (OpenAI Vision)
 
-Image description
+**Model:** `chatgpt-4o-latest`
 
-Product image (.jpg)
+Extracts:
 
-Node: On form submission
+- Brand name (if visible)  
+- Color scheme (hex + descriptive name)  
+- Font style  
+- Outfit style  
+- Visual description  
 
-2️⃣ Upload to Google Drive
+Returns structured YAML output.
 
-Stores uploaded image
+---
 
-Returns webContentLink for AI processing
+### 4️⃣ AI Prompt Engineering Agent
 
-Node: Upload file
+**Model:** `gpt-4.1-mini`
 
-3️⃣ Image Analysis (OpenAI Vision)
-
-Model: chatgpt-4o-latest
-
-Detects whether the image shows:
-
-A product
-
-A character
-
-Or both
-
-Returns structured YAML:
-
-Brand name
-
-Color scheme (hex + name)
-
-Font style
-
-Outfit style
-
-Visual description
-
-Node: Analyze image
-
-4️⃣ AI Prompt Engineering Agent
-
-Uses:
-
-gpt-4.1-mini
-
-Structured Output Parser (JSON enforced)
-
-Role:
-
-Kids Clothing Image Edit Prompt Builder
+Custom Role:
+> Kids Clothing Image Edit Prompt Builder  
 
 The agent:
 
-Keeps clothes 100% identical
+- Preserves clothing details exactly  
+- Adds realistic camera cues  
+- Adds lifestyle setting and mood  
+- Produces a structured JSON output  
 
-Adds realistic camera cues
+Example:
 
-Adds setting and mood
-
-Generates ≤120 word image prompt
-
-Returns clean JSON:
-
+```json
 {
-  "image_prompt": "..."
+  "image_prompt": "adorable 5-year-old child wearing the exact outfit from uploaded image..."
 }
+```
 
-Nodes:
+---
 
-OpenAI Chat Model
+### 5️⃣ Image Generation (Gemini via OpenRouter)
 
-Image Prompt Generator
-
-Structured Output Parser
-
-5️⃣ Image Generation (Gemini via OpenRouter)
-
-Endpoint:
-
-https://openrouter.ai/api/v1/chat/completions
-
-Model:
-
-google/gemini-2.5-flash-image
+**Model:** `google/gemini-2.5-flash-image`
 
 Inputs:
-
-Generated image prompt
-
-Reference image URL
+Generated structured image prompt
+Reference product image
 
 Output:
+Base64 encoded image
 
-Base64 image
+---
 
-Node: HTTP Request
+### 6️⃣ Image Extraction & Conversion
 
-6️⃣ Image Extraction & Conversion
+- Extract base64 image
+- Detect MIME type
+- Convert to binary
+- Output final PNG file
 
-Extract base64
+---
 
-Detect MIME type
+### 🔄 Logical Flow
 
-Convert to binary file
+Form → Google Drive → Vision Analysis → Prompt Generator → Gemini Image → Image Conversion → Final Output
 
-Output final PNG
+---
 
-Nodes:
+## ✨ Key Features
 
-Edit Fields
+📤 File upload via form
+🧠 Vision-based product analysis
+🎯 Structured prompt engineering
+🔒 JSON-enforced output format
+🖼️ AI image generation with reference preservation
+🔄 Automatic base64 extraction and conversion
+📦 Ready-to-use marketing visuals
 
-Convert to File
+---
 
-🔐 Required Credentials
+### 🛠️ Tech Stack
 
-You must configure:
+- n8n (Workflow Automation)
+- OpenAI Vision API
+-GPT-4.1-mini
+-OpenRouter API
+-Google Gemini 2.5 Flash Image
+-Google Drive API
 
-✅ OpenAI API
+---
 
-✅ OpenRouter API
+### 🔐 Required Credentials
 
-✅ Google Drive OAuth2
+To run this workflow, you need:
 
-✅ HTTP Bearer Auth (for OpenRouter)
+- OpenAI API Key
+- OpenRouter API Key
+- Google Drive OAuth2 Credentials
+- HTTP Bearer Authentication
 
-🧩 How It Works (Flow Summary)
-Form → Google Drive Upload → Vision Analysis → Prompt Generator 
-→ Gemini Image Generation → Base64 Extraction → PNG Output
-🎯 Use Cases
+---
 
-Kids fashion e-commerce
+### 📦 Use Cases
 
-UGC-style ad generation
+- Kids fashion e-commerce
+- Shopify product marketing
+- Social media ad generation
+- UGC-style content creation
+- AI-powered creative automation
 
-Shopify product marketing
+---
 
-Social media creatives
+### 🎨 Output Style Characteristics
 
-Product visualization at scale
+- Realistic child model (age adapted to clothing)
+- Natural indoor/outdoor lighting
+- Handheld phone-style framing
+- Slight imperfections for authentic UGC feel
+- Exact clothing preservation (colors, patterns, logos)
 
-⚙️ Customization Options
+---
 
-You can easily modify:
+### 📈 Scalability Potential
 
-Style realism level
+This workflow can be extended into:
 
-Background type
+- SaaS product for clothing brands
+- Bulk product image generator
+- Automated ad creative generator
+- Shopify integration
+- AI marketing pipeline
 
-Camera aesthetics
+---
 
-Age range
+### 👩‍💻 Author
 
-Ethnicity diversity
+Fatima Zohra
+Master’s Student in Artificial Intelligence for Digital Economy
+Focused on AI automation, prompt engineering, and intelligent workflow systems.
 
-Ad mood (playful, premium, cozy, etc.)
+---
 
-📦 Output Example
+### 📄 License
 
-Final result:
+This project is for educational and portfolio purposes.
+Ensure compliance with API provider terms for commercial use.
 
-A realistic child wearing the exact uploaded outfit
-
-Natural lighting
-
-Slight imperfections (authentic feel)
-
-Lifestyle setting
-
-Ad-ready visual
